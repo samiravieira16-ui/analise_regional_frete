@@ -14,10 +14,10 @@ def carregar_e_processar_dados(data_path='data/'):
     print("Carregando datasets...")
     
     files = {
-        'orders': 'olist_orders_dataset.csv',
-        'items': 'olist_order_items_dataset.csv',
-        'customers': 'olist_customers_dataset.csv',
-        'sellers': 'olist_sellers_dataset.csv'
+        'orders': 'Conjunto_de_dados_de_pedidos.csv',
+        'items': 'Conjunto_de_dados_de_itens_do_pedido.csv',
+        'customers': 'Conjunto_de_dados_de_clientes.csv',
+        'sellers': 'Conjunto_de_dados_de_vendedores.csv'
     }
     
     for key, filename in files.items():
@@ -163,7 +163,6 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     plt.tight_layout()
     plt.savefig('outputs/analise1_percentual_compras.png', dpi=150)
     print("\nSalvo: outputs/analise1_percentual_compras.png")
-    plt.show()
 
     # ---- FIG 2: Heatmaps de Volume e Frete ----
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -186,7 +185,6 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     plt.tight_layout()
     plt.savefig('outputs/analise2_heatmaps_fluxo_frete.png', dpi=150)
     print("Salvo: outputs/analise2_heatmaps_fluxo_frete.png")
-    plt.show()
 
     # ---- FIG 3: Frete e Ratio Intra vs Inter ----
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
@@ -213,7 +211,6 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     plt.tight_layout()
     plt.savefig('outputs/analise3_influencia_frete_proximidade.png', dpi=150)
     print("Salvo: outputs/analise3_influencia_frete_proximidade.png")
-    plt.show()
 
 
 # ==============================================================================
