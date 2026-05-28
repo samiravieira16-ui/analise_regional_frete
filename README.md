@@ -45,10 +45,10 @@ analise_regional_frete/
 │   └── utils.py            # Mapeamento de estados para regiões do Brasil
 │
 ├── data/                   # (não versionada) CSVs do dataset Olist
-│   ├── olist_orders_dataset.csv
-│   ├── olist_order_items_dataset.csv
-│   ├── olist_customers_dataset.csv
-│   └── olist_sellers_dataset.csv
+│   ├── olist_orders_dataset.csv  # Conjunto_de_dados_de_pedidos
+│   ├── olist_order_items_dataset.csv # Conjunto_de_dados_de_itens_do_pedido
+│   ├── olist_customers_dataset.csv  # Conjunto_de_dados_de_clientes
+│   └── olist_sellers_dataset.csv  # Conjunto_de_dados_de_vendedores
 │
 ├── outputs/                # (gerada ao executar) Gráficos e CSVs de resultado
 │   ├── analise1_percentual_compras.png
