@@ -5,7 +5,6 @@ import matplotlib.ticker as mticker
 import seaborn as sns
 import os
 from src.utils import get_region
-
 # ==============================================================================
 # CARGA E PROCESSAMENTO DOS DADOS
 # ==============================================================================
@@ -30,23 +29,23 @@ def carregar_e_processar_dados(data_path='data/'):
     df_sellers  = pd.read_csv(os.path.join(data_path, files['sellers']))
     
     print("Mesclando dados...")
-    df = pd.merge(df_items,    df_orders,    on='order_id')
-    df = pd.merge(df,          df_customers, on='customer_id')
-    df = pd.merge(df,          df_sellers,   on='seller_id', suffixes=('_cust', '_sell'))
+    df = pd.merge(df_items,    df_orders,    on='pedido_id')
+    df = pd.merge(df,          df_customers, on='cliente_id')
+    df = pd.merge(df,          df_sellers,   on='vendedor_id', suffixes=('_cust', '_sell'))
     
     print("Mapeando regiões...")
-    df['customer_region'] = df['customer_state'].apply(get_region)
-    df['seller_region']   = df['seller_state'].apply(get_region)
+    df['regiao_cliente'] = df['estado_cliente'].apply(get_region)
+    df['regiao_vendedor']   = df['estado_vendedor'].apply(get_region)
     
     # Classificar como INTRA-regional (mesma região) ou INTER-regional (regiões diferentes)
     df['tipo_compra'] = np.where(
-        df['customer_region'] == df['seller_region'],
+        df['regiao_cliente'] == df['regiao_vendedor'],
         'Intra-Regional',
         'Inter-Regional'
     )
     
     # Calcular ratio frete/preço do produto (percentual que o frete representa no preço)
-    df['ratio_frete_preco'] = (df['freight_value'] / df['price'].replace(0, np.nan)) * 100
+    df['ratio_frete_preco'] = (df['valor_frete'] / df['preco'].replace(0, np.nan)) * 100
     
     return df
 
@@ -72,12 +71,12 @@ def analise_percentual_compras(df):
     print(resumo_geral.to_string(index=False))
 
     # --- Detalhado por Região do Comprador ---
-    por_regiao = df.groupby(['customer_region', 'tipo_compra']).size().reset_index(name='total')
-    total_por_regiao = por_regiao.groupby('customer_region')['total'].transform('sum')
+    por_regiao = df.groupby(['regiao_cliente', 'tipo_compra']).size().reset_index(name='total')
+    total_por_regiao = por_regiao.groupby('regiao_cliente')['total'].transform('sum')
     por_regiao['percentual (%)'] = (por_regiao['total'] / total_por_regiao * 100).round(2)
 
     print("\n--- Detalhado por Região do Comprador ---")
-    print(por_regiao.sort_values(['customer_region', 'tipo_compra']).to_string(index=False))
+    print(por_regiao.sort_values(['regiao_cliente', 'tipo_compra']).to_string(index=False))
     
     return resumo_geral, por_regiao
 
@@ -88,10 +87,10 @@ def analise_percentual_compras(df):
 
 def analise_fluxo_e_frete(df):
     """Calcula frete médio e volume de vendas por cada par (vendedor -> comprador)."""
-    fluxo = df.groupby(['seller_region', 'customer_region']).agg(
-        total_vendas = ('order_id', 'count'),
-        frete_medio  = ('freight_value', 'mean'),
-        preco_medio  = ('price', 'mean'),
+    fluxo = df.groupby(['regiao_vendedor', 'regiao_cliente']).agg(
+        total_vendas = ('pedido_id', 'count'),
+        frete_medio  = ('valor_frete', 'mean'),
+        preco_medio  = ('preco', 'mean'),
         ratio_medio  = ('ratio_frete_preco', 'mean')
     ).reset_index()
     
@@ -116,10 +115,10 @@ def analise_influencia_frete_proximidade(df):
     por região do comprador. Responde: o frete mais baixo induz o cliente
     a comprar de vendedores mais próximos?
     """
-    comparacao = df.groupby(['customer_region', 'tipo_compra']).agg(
-        frete_medio         = ('freight_value', 'mean'),
+    comparacao = df.groupby(['regiao_cliente', 'tipo_compra']).agg(
+        frete_medio         = ('valor_frete', 'mean'),
         ratio_frete_preco   = ('ratio_frete_preco', 'mean'),
-        total_pedidos       = ('order_id', 'count')
+        total_pedidos       = ('pedido_id', 'count')
     ).reset_index()
     
     print("\n" + "="*60)
@@ -151,7 +150,7 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     axes[0].set_title('Proporção Geral de Compras')
 
     # Barras empilhadas por região do comprador
-    pivot = por_regiao.pivot(index='customer_region', columns='tipo_compra', values='percentual (%)').fillna(0)
+    pivot = por_regiao.pivot(index='regiao_cliente', columns='tipo_compra', values='percentual (%)').fillna(0)
     pivot.plot(kind='bar', stacked=True, ax=axes[1], color=['#4CAF50', '#FF7043'], edgecolor='white')
     axes[1].set_title('Percentual por Região do Comprador')
     axes[1].set_xlabel('Região do Comprador')
@@ -168,14 +167,14 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     fig.suptitle('Análise 2: Heatmaps de Fluxo Regional', fontsize=14, fontweight='bold')
 
-    matrix_vendas = fluxo.pivot(index='seller_region', columns='customer_region', values='perc_total (%)').fillna(0)
+    matrix_vendas = fluxo.pivot(index='regiao_vendedor', columns='regiao_cliente', values='perc_total (%)').fillna(0)
     sns.heatmap(matrix_vendas, annot=True, fmt=".1f", cmap="YlGnBu", ax=axes[0],
                 linewidths=.5, cbar_kws={'label': '% do Total'})
     axes[0].set_title('% de Pedidos por Fluxo\n(Linha: Vendedor | Coluna: Comprador)')
     axes[0].set_xlabel('Região do Comprador')
     axes[0].set_ylabel('Região do Vendedor')
 
-    matrix_frete = fluxo.pivot(index='seller_region', columns='customer_region', values='frete_medio').fillna(0)
+    matrix_frete = fluxo.pivot(index='regiao_vendedor', columns='regiao_cliente', values='frete_medio').fillna(0)
     sns.heatmap(matrix_frete, annot=True, fmt=".2f", cmap="Reds", ax=axes[1],
                 linewidths=.5, cbar_kws={'label': 'R$ Frete Médio'})
     axes[1].set_title('Frete Médio (R$) por Fluxo\n(Linha: Vendedor | Coluna: Comprador)')
@@ -191,7 +190,7 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig.suptitle('Análise 3: Influência do Frete na Escolha por Proximidade', fontsize=14, fontweight='bold')
 
     # Frete médio por tipo de compra e região
-    pivot_frete = comparacao.pivot(index='customer_region', columns='tipo_compra', values='frete_medio').fillna(0)
+    pivot_frete = comparacao.pivot(index='regiao_cliente', columns='tipo_compra', values='frete_medio').fillna(0)
     pivot_frete.plot(kind='bar', ax=axes[0], color=['#1565C0', '#EF6C00'], edgecolor='white', width=0.7)
     axes[0].set_title('Frete Médio (R$): Intra vs Inter por Região')
     axes[0].set_xlabel('Região do Comprador')
@@ -200,7 +199,7 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     axes[0].legend(title='Tipo de Compra')
 
     # Ratio frete/preço por tipo de compra e região
-    pivot_ratio = comparacao.pivot(index='customer_region', columns='tipo_compra', values='ratio_frete_preco').fillna(0)
+    pivot_ratio = comparacao.pivot(index='regiao_cliente', columns='tipo_compra', values='ratio_frete_preco').fillna(0)
     pivot_ratio.plot(kind='bar', ax=axes[1], color=['#1565C0', '#EF6C00'], edgecolor='white', width=0.7)
     axes[1].set_title('Frete como % do Preço do Produto\nIntra vs Inter por Região')
     axes[1].set_xlabel('Região do Comprador')

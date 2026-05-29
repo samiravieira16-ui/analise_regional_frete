@@ -1,0 +1,19 @@
+UV é uma ferramenta de versionamente do Python, a sua utilização facilita a questão de dependencias desse projeto.
+Para Instalar no terminal mac ou linux (ou Codespace no GitHub):
+
+-> curl -LsSf https://astral.sh/uv/install.sh | sh
+
+Obs.: Verifique se o 'curl' está instalado pelo comando: 
+-> curl --version 
+
+se não, instale como: 
+-> sudo apt install curl
+_______________________________________________________________
+
+Como o UV instalado para inicializar use:
+-> uv run 
+Para ver se a atualização:
+-> uv self update
+
+Para mais informações faça uso da pagina oficial do projeto. 
+https://docs.astral.sh/uv/

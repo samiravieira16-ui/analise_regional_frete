@@ -55,5 +55,57 @@ def limpar_colunas_csvs(data_path='data/'):
 
     print("Limpeza concluída com sucesso! Os arquivos CSV originais foram sobrescritos com as versões otimizadas.")
 
+
+def renomear_colunas_para_portugues(data_path='data/'):
+    """
+    Renomeia as colunas dos CSVs de inglês para português.
+    Esta etapa é parte da limpeza e preparação dos dados.
+    """
+    print("\nRenomeando colunas para português...")
+
+    # Mapeamento de tradução (inglês → português)
+    traducoes = {
+        'customer_id': 'cliente_id',
+        'customer_state': 'estado_cliente',
+        'order_id': 'pedido_id',
+        'seller_id': 'vendedor_id',
+        'price': 'preco',
+        'freight_value': 'valor_frete',
+        'seller_state': 'estado_vendedor'
+    }
+
+    # Lista de arquivos CSV
+    arquivos = [
+        'Conjunto_de_dados_de_pedidos.csv',
+        'Conjunto_de_dados_de_itens_do_pedido.csv',
+        'Conjunto_de_dados_de_clientes.csv',
+        'Conjunto_de_dados_de_vendedores.csv'
+    ]
+
+    # Processar cada arquivo
+    for arquivo in arquivos:
+        caminho = os.path.join(data_path, arquivo)
+        
+        if os.path.exists(caminho):
+            print(f"  Renomeando colunas: {arquivo}")
+            
+            # Ler CSV
+            df = pd.read_csv(caminho)
+            
+            # Renomear apenas as colunas que existem
+            renomeacoes = {col: traducoes[col] for col in df.columns if col in traducoes}
+            if renomeacoes:
+                df = df.rename(columns=renomeacoes)
+                df.to_csv(caminho, index=False)
+                print(f"    ✓ Colunas renomeadas: {list(renomeacoes.values())}")
+            else:
+                print(f"    ℹ Nenhuma coluna para traduzir neste arquivo")
+        else:
+            print(f"  ⚠ Arquivo não encontrado: {arquivo}")
+
+    print("Renomeação concluída com sucesso!")
+
+
 if __name__ == "__main__":
     limpar_colunas_csvs()
+    renomear_colunas_para_portugues()

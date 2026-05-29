@@ -34,6 +34,45 @@ Os arquivos utilizados são:
 
 ---
 
+## Instalação
+
+### Pré-requisitos
+- Python 3.8+
+- pip (gerenciador de pacotes Python)
+
+### Passos de Instalação
+
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/samiravieira16-ui/analise_regional_frete.git
+   cd analise_regional_frete
+   ```
+
+2. **Instale as dependências:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure os dados:**
+   - Baixe o dataset em [Kaggle - Brazilian E-Commerce](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+   - Coloque os arquivos CSV na pasta `data/`:
+     ```
+     data/
+     ├── Conjunto_de_dados_de_pedidos.csv
+     ├── Conjunto_de_dados_de_itens_do_pedido.csv
+     ├── Conjunto_de_dados_de_clientes.csv
+     └── Conjunto_de_dados_de_vendedores.csv
+     ```
+
+4. **Execute a análise:**
+   ```bash
+   python analise_regional.py
+   ```
+
+Os resultados (gráficos e CSVs) serão gerados na pasta `outputs/`.
+
+---
+
 ## Estrutura do Projeto
 
 ```
