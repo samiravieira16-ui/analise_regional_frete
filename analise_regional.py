@@ -9,8 +9,9 @@ from src.utils import get_region
 # CARGA E PROCESSAMENTO DOS DADOS
 # ==============================================================================
 
-def carregar_e_processar_dados(data_path='data/'):
-    print("Carregando datasets...")
+def carregar_e_processar_dados():
+    base_url = "https://raw.githubusercontent.com/samiravieira16-ui/analise_regional_frete/main/data/"
+    print(f"Carregando datasets do repositório remoto: {base_url}...")
     
     files = {
         'orders': 'Conjunto_de_dados_de_pedidos.csv',
@@ -19,14 +20,11 @@ def carregar_e_processar_dados(data_path='data/'):
         'sellers': 'Conjunto_de_dados_de_vendedores.csv'
     }
     
-    for key, filename in files.items():
-        if not os.path.exists(os.path.join(data_path, filename)):
-            raise FileNotFoundError(f"Arquivo '{filename}' não encontrado em '{data_path}'")
-    
-    df_orders   = pd.read_csv(os.path.join(data_path, files['orders']))
-    df_items    = pd.read_csv(os.path.join(data_path, files['items']))
-    df_customers= pd.read_csv(os.path.join(data_path, files['customers']))
-    df_sellers  = pd.read_csv(os.path.join(data_path, files['sellers']))
+    # Fazendo o download diretamente da URL remota (raw)
+    df_orders   = pd.read_csv(f"{base_url}{files['orders']}")
+    df_items    = pd.read_csv(f"{base_url}{files['items']}")
+    df_customers= pd.read_csv(f"{base_url}{files['customers']}")
+    df_sellers  = pd.read_csv(f"{base_url}{files['sellers']}")
     
     print("Mesclando dados...")
     df = pd.merge(df_items,    df_orders,    on='pedido_id')
@@ -232,7 +230,6 @@ if __name__ == "__main__":
         comparacao.to_csv('outputs/influencia_frete.csv', index=False)
         print("\nCSVs de resultado salvos em 'outputs/'.")
         
-    except FileNotFoundError as e:
-        print(f"\nERRO: {e}")
-        print("Baixe o dataset em https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce")
-        print("e coloque os arquivos CSV na pasta 'data/' do projeto.")
+    except Exception as e:
+        print(f"\nERRO ao acessar os dados remotos: {e}")
+        print("Verifique sua conexão com a internet ou se os arquivos existem no repositório GitHub.")
