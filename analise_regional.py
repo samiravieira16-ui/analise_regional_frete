@@ -179,7 +179,7 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig.suptitle('Análise 2: Heatmaps de Fluxo Regional', fontsize=14, fontweight='bold')
 
     matrix_vendas = fluxo.pivot(index='regiao_vendedor', columns='regiao_cliente', values='perc_total (%)').fillna(0)
-    sns.heatmap(matrix_vendas, annot=True, fmt=".1f", cmap="YlGnBu", ax=axes[0],
+    sns.heatmap(matrix_vendas, annot=True, fmt=".2f", cmap="YlGnBu", ax=axes[0],
                 linewidths=.5, cbar_kws={'label': '% do Total'})
     axes[0].set_title('% de Pedidos por Fluxo\n(Linha: Vendedor | Coluna: Comprador)')
     axes[0].set_xlabel('Região do Comprador')
