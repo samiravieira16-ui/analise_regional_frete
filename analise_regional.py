@@ -3,7 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import seaborn as sns
+import sys
 import os
+
+# Ajuste automático do diretório de trabalho para compatibilidade com o VSCode Interactive Window
+_this_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else os.path.join(os.getcwd(), 'analise_regional_frete')
+if _this_dir not in sys.path and os.path.exists(_this_dir):
+    sys.path.append(_this_dir)
+elif os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
+
 from src.utils import get_region
 # ==============================================================================
 # CARGA E PROCESSAMENTO DOS DADOS
