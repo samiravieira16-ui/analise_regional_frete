@@ -150,15 +150,19 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     fig.suptitle('Análise 1: Compras Intra vs Inter-Regional', fontsize=14, fontweight='bold')
 
+    cores_dict = {'Intra-Regional': '#4CAF50', 'Inter-Regional': '#FF7043'}
+
     # Pizza geral
+    cores_pizza = [cores_dict[val] for val in resumo_geral['tipo_compra']]
     axes[0].pie(resumo_geral['percentual (%)'], labels=resumo_geral['tipo_compra'],
                 autopct='%1.1f%%', startangle=90,
-                colors=['#4CAF50', '#FF7043'], wedgeprops=dict(edgecolor='white', linewidth=2))
+                colors=cores_pizza, wedgeprops=dict(edgecolor='white', linewidth=2))
     axes[0].set_title('Proporção Geral de Compras')
 
     # Barras empilhadas por região do comprador
     pivot = por_regiao.pivot(index='regiao_cliente', columns='tipo_compra', values='percentual (%)').fillna(0)
-    pivot.plot(kind='bar', stacked=True, ax=axes[1], color=['#4CAF50', '#FF7043'], edgecolor='white')
+    cores_barras = [cores_dict[col] for col in pivot.columns]
+    pivot.plot(kind='bar', stacked=True, ax=axes[1], color=cores_barras, edgecolor='white')
     axes[1].set_title('Percentual por Região do Comprador')
     axes[1].set_xlabel('Região do Comprador')
     axes[1].set_ylabel('Percentual (%)')
@@ -196,9 +200,12 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     fig.suptitle('Análise 3: Influência do Frete na Escolha por Proximidade', fontsize=14, fontweight='bold')
 
+    cores_dict = {'Intra-Regional': '#4CAF50', 'Inter-Regional': '#FF7043'}
+
     # Frete médio por tipo de compra e região
     pivot_frete = comparacao.pivot(index='regiao_cliente', columns='tipo_compra', values='frete_medio').fillna(0)
-    pivot_frete.plot(kind='bar', ax=axes[0], color=['#1565C0', '#EF6C00'], edgecolor='white', width=0.7)
+    cores_frete = [cores_dict[col] for col in pivot_frete.columns]
+    pivot_frete.plot(kind='bar', ax=axes[0], color=cores_frete, edgecolor='white', width=0.7)
     axes[0].set_title('Frete Médio (R$): Intra vs Inter por Região')
     axes[0].set_xlabel('Região do Comprador')
     axes[0].set_ylabel('Frete Médio (R$)')
@@ -207,7 +214,8 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
 
     # Ratio frete/preço por tipo de compra e região
     pivot_ratio = comparacao.pivot(index='regiao_cliente', columns='tipo_compra', values='ratio_frete_preco').fillna(0)
-    pivot_ratio.plot(kind='bar', ax=axes[1], color=['#1565C0', '#EF6C00'], edgecolor='white', width=0.7)
+    cores_ratio = [cores_dict[col] for col in pivot_ratio.columns]
+    pivot_ratio.plot(kind='bar', ax=axes[1], color=cores_ratio, edgecolor='white', width=0.7)
     axes[1].set_title('Frete como % do Preço do Produto\nIntra vs Inter por Região')
     axes[1].set_xlabel('Região do Comprador')
     axes[1].set_ylabel('Frete / Preço (%)')
