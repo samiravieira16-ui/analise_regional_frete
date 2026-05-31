@@ -132,7 +132,7 @@ def analise_influencia_frete_proximidade(df):
     print("ANÁLISE 3: Frete Médio e Ratio Frete/Preço (Intra vs Inter)")
     print("Quanto maior o ratio, mais o frete 'pesa' no preço final.")
     print("="*60)
-    print(comparacao.sort_values(['customer_region', 'tipo_compra']).to_string(index=False))
+    print(comparacao.sort_values(['regiao_cliente', 'tipo_compra']).to_string(index=False))
     
     return comparacao
 
