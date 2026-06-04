@@ -283,23 +283,22 @@ def plot_treemap_sudeste_comparativo(fluxo):
 # ==============================================================================
 
 if __name__ == "__main__":
+    df = carregar_e_processar_dados()
+
+    resumo_geral, por_regiao = analise_percentual_compras(df)
+    fluxo                    = analise_fluxo_e_frete(df)
+    comparacao               = analise_influencia_frete_proximidade(df)
+
+    plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao)
+    # Gráfico adicional: treemap comparativo Sudeste -> outras regiões
     try:
-        df = carregar_e_processar_dados()
+        plot_treemap_sudeste_comparativo(fluxo)
+    except Exception as e:
+        print(f"Falha ao gerar treemap comparativo: {e}")
 
-        resumo_geral, por_regiao = analise_percentual_compras(df)
-        fluxo                    = analise_fluxo_e_frete(df)
-        comparacao               = analise_influencia_frete_proximidade(df)
-
-        plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao)
-        # Gráfico adicional: treemap comparativo Sudeste -> outras regiões
-        try:
-            plot_treemap_sudeste_comparativo(fluxo)
-        except Exception as e:
-            print(f"Falha ao gerar treemap comparativo: {e}")
-
-        # Exportar resultados em CSV para uso posterior no modelo de Deep Learning
-        os.makedirs('outputs', exist_ok=True)
-        fluxo.to_csv('outputs/fluxo_regional.csv', index=False)
-        comparacao.to_csv('outputs/influencia_frete.csv', index=False)
-        print("\nCSVs de resultado salvos em 'outputs/'.")
+    # Exportar resultados em CSV para uso posterior no modelo de Deep Learning
+    os.makedirs('outputs', exist_ok=True)
+    fluxo.to_csv('outputs/fluxo_regional.csv', index=False)
+    comparacao.to_csv('outputs/influencia_frete.csv', index=False)
+    print("\nCSVs de resultado salvos em 'outputs/'.")
  
