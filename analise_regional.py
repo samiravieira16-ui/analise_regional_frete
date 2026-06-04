@@ -3,24 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import seaborn as sns
-import sys
 import os
-
-# Ajuste automático do diretório de trabalho para compatibilidade com o VSCode Interactive Window
-_this_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else os.path.join(os.getcwd(), 'analise_regional_frete')
-if _this_dir not in sys.path and os.path.exists(_this_dir):
-    sys.path.append(_this_dir)
-elif os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
-
 from src.utils import get_region
 # ==============================================================================
 # CARGA E PROCESSAMENTO DOS DADOS
 # ==============================================================================
 
-def carregar_e_processar_dados():
-    base_url = "https://raw.githubusercontent.com/samiravieira16-ui/analise_regional_frete/main/data/"
-    print(f"Carregando datasets do repositório remoto: {base_url}...")
+def carregar_e_processar_dados(data_path='data/'):
+    print("Carregando datasets...")
     
     files = {
         'orders': 'Conjunto_de_dados_de_pedidos.csv',
@@ -29,11 +19,14 @@ def carregar_e_processar_dados():
         'sellers': 'Conjunto_de_dados_de_vendedores.csv'
     }
     
-    # Fazendo o download diretamente da URL remota (raw)
-    df_orders   = pd.read_csv(f"{base_url}{files['orders']}")
-    df_items    = pd.read_csv(f"{base_url}{files['items']}")
-    df_customers= pd.read_csv(f"{base_url}{files['customers']}")
-    df_sellers  = pd.read_csv(f"{base_url}{files['sellers']}")
+    for key, filename in files.items():
+        if not os.path.exists(os.path.join(data_path, filename)):
+            raise FileNotFoundError(f"Arquivo '{filename}' não encontrado em '{data_path}'")
+    
+    df_orders   = pd.read_csv(os.path.join(data_path, files['orders']))
+    df_items    = pd.read_csv(os.path.join(data_path, files['items']))
+    df_customers= pd.read_csv(os.path.join(data_path, files['customers']))
+    df_sellers  = pd.read_csv(os.path.join(data_path, files['sellers']))
     
     print("Mesclando dados...")
     df = pd.merge(df_items,    df_orders,    on='pedido_id')
@@ -132,7 +125,7 @@ def analise_influencia_frete_proximidade(df):
     print("ANÁLISE 3: Frete Médio e Ratio Frete/Preço (Intra vs Inter)")
     print("Quanto maior o ratio, mais o frete 'pesa' no preço final.")
     print("="*60)
-    print(comparacao.sort_values(['regiao_cliente', 'tipo_compra']).to_string(index=False))
+    print(comparacao.sort_values(['customer_region', 'tipo_compra']).to_string(index=False))
     
     return comparacao
 
@@ -153,16 +146,14 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig.suptitle('Análise 1: Compras Intra vs Inter-Regional', fontsize=14, fontweight='bold')
 
     # Pizza geral
-    cores_pizza = [cores_dict[val] for val in resumo_geral['tipo_compra']]
     axes[0].pie(resumo_geral['percentual (%)'], labels=resumo_geral['tipo_compra'],
                 autopct='%1.1f%%', startangle=90,
-                colors=cores_pizza, wedgeprops=dict(edgecolor='white', linewidth=2))
+                colors=['#4CAF50', '#FF7043'], wedgeprops=dict(edgecolor='white', linewidth=2))
     axes[0].set_title('Proporção Geral de Compras')
 
     # Barras empilhadas por região do comprador
     pivot = por_regiao.pivot(index='regiao_cliente', columns='tipo_compra', values='percentual (%)').fillna(0)
-    cores_barras = [cores_dict[col] for col in pivot.columns]
-    pivot.plot(kind='bar', stacked=True, ax=axes[1], color=cores_barras, edgecolor='white')
+    pivot.plot(kind='bar', stacked=True, ax=axes[1], color=['#4CAF50', '#FF7043'], edgecolor='white')
     axes[1].set_title('Percentual por Região do Comprador')
     axes[1].set_xlabel('Região do Comprador')
     axes[1].set_ylabel('Percentual (%)')
@@ -179,7 +170,7 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig.suptitle('Análise 2: Heatmaps de Fluxo Regional', fontsize=14, fontweight='bold')
 
     matrix_vendas = fluxo.pivot(index='regiao_vendedor', columns='regiao_cliente', values='perc_total (%)').fillna(0)
-    sns.heatmap(matrix_vendas, annot=True, fmt=".2f", cmap="YlGnBu", ax=axes[0],
+    sns.heatmap(matrix_vendas, annot=True, fmt=".1f", cmap="YlGnBu", ax=axes[0],
                 linewidths=.5, cbar_kws={'label': '% do Total'})
     axes[0].set_title('% de Pedidos por Fluxo\n(Linha: Vendedor | Coluna: Comprador)')
     axes[0].set_xlabel('Região do Comprador')
@@ -202,8 +193,7 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
 
     # Frete médio por tipo de compra e região
     pivot_frete = comparacao.pivot(index='regiao_cliente', columns='tipo_compra', values='frete_medio').fillna(0)
-    cores_frete = [cores_dict[col] for col in pivot_frete.columns]
-    pivot_frete.plot(kind='bar', ax=axes[0], color=cores_frete, edgecolor='white', width=0.7)
+    pivot_frete.plot(kind='bar', ax=axes[0], color=['#1565C0', '#EF6C00'], edgecolor='white', width=0.7)
     axes[0].set_title('Frete Médio (R$): Intra vs Inter por Região')
     axes[0].set_xlabel('Região do Comprador')
     axes[0].set_ylabel('Frete Médio (R$)')
@@ -212,8 +202,7 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
 
     # Ratio frete/preço por tipo de compra e região
     pivot_ratio = comparacao.pivot(index='regiao_cliente', columns='tipo_compra', values='ratio_frete_preco').fillna(0)
-    cores_ratio = [cores_dict[col] for col in pivot_ratio.columns]
-    pivot_ratio.plot(kind='bar', ax=axes[1], color=cores_ratio, edgecolor='white', width=0.7)
+    pivot_ratio.plot(kind='bar', ax=axes[1], color=['#1565C0', '#EF6C00'], edgecolor='white', width=0.7)
     axes[1].set_title('Frete como % do Preço do Produto\nIntra vs Inter por Região')
     axes[1].set_xlabel('Região do Comprador')
     axes[1].set_ylabel('Frete / Preço (%)')
