@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,6 +6,7 @@ import matplotlib.ticker as mticker
 import seaborn as sns
 import os
 from src.utils import get_region
+
 # ==============================================================================
 # CARGA E PROCESSAMENTO DOS DADOS
 # ==============================================================================
@@ -101,9 +103,10 @@ def analise_fluxo_e_frete(df):
     print("ANÁLISE 2: Fluxo de Frete entre Regiões (Top 10 por volume)")
     print("="*60)
     print(fluxo.sort_values('total_vendas', ascending=False).head(10).to_string(index=False))
+    print("\n--- Fluxo Regional Completo ---")
+    print(fluxo.to_string(index=False))
     
     return fluxo
-
 
 # ==============================================================================
 # ANÁLISE 3: FRETE COMO FATOR DE ESCOLHA POR PROXIMIDADE
@@ -125,11 +128,11 @@ def analise_influencia_frete_proximidade(df):
     print("ANÁLISE 3: Frete Médio e Ratio Frete/Preço (Intra vs Inter)")
     print("Quanto maior o ratio, mais o frete 'pesa' no preço final.")
     print("="*60)
-    print(comparacao.sort_values(['customer_region', 'tipo_compra']).to_string(index=False))
+    print(comparacao.sort_values(['regiao_cliente', 'tipo_compra']).to_string(index=False))
+    print("\n--- Comparação Completa de Influência do Frete ---")
+    print(comparacao.to_string(index=False))
     
     return comparacao
-
-
 # ==============================================================================
 # VISUALIZAÇÕES
 # ==============================================================================
