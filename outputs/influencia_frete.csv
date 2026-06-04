@@ -1,4 +1,4 @@
-customer_region,tipo_compra,frete_medio,ratio_frete_preco,total_pedidos
+regiao_cliente,tipo_compra,frete_medio,ratio_frete_preco,total_pedidos
 Centro-Oeste,Inter-Regional,23.377853666195634,35.7023577679987,6369
 Centro-Oeste,Intra-Regional,15.190122950819672,26.701626607822167,244
 Nordeste,Inter-Regional,32.72975133393738,45.876837150493095,9933

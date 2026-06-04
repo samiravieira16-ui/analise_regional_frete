@@ -1,4 +1,4 @@
-seller_region,customer_region,total_vendas,frete_medio,preco_medio,ratio_medio,perc_total (%)
+regiao_vendedor,regiao_cliente,total_vendas,frete_medio,preco_medio,ratio_medio,perc_total (%)
 Centro-Oeste,Centro-Oeste,244,15.190122950819672,86.20758196721312,26.701626607822167,0.22
 Centro-Oeste,Nordeste,189,30.819259259259262,134.3221693121693,41.538127892329214,0.17
 Centro-Oeste,Norte,45,27.294444444444444,125.53844444444445,32.25553180740463,0.04

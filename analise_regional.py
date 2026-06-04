@@ -146,11 +146,11 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     sns.set_theme(style="whitegrid", palette="muted", font_scale=1.1)
     os.makedirs('outputs', exist_ok=True)
 
+    cores_dict = {'Intra-Regional': '#4CAF50', 'Inter-Regional': '#FF7043'}
+
     # ---- FIG 1: Pizza + Barras empilhadas ----
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     fig.suptitle('Análise 1: Compras Intra vs Inter-Regional', fontsize=14, fontweight='bold')
-
-    cores_dict = {'Intra-Regional': '#4CAF50', 'Inter-Regional': '#FF7043'}
 
     # Pizza geral
     cores_pizza = [cores_dict[val] for val in resumo_geral['tipo_compra']]
@@ -200,8 +200,6 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     fig.suptitle('Análise 3: Influência do Frete na Escolha por Proximidade', fontsize=14, fontweight='bold')
 
-    cores_dict = {'Intra-Regional': '#4CAF50', 'Inter-Regional': '#FF7043'}
-
     # Frete médio por tipo de compra e região
     pivot_frete = comparacao.pivot(index='regiao_cliente', columns='tipo_compra', values='frete_medio').fillna(0)
     cores_frete = [cores_dict[col] for col in pivot_frete.columns]
@@ -227,6 +225,57 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
     print("Salvo: outputs/analise3_influencia_frete_proximidade.png")
 
 
+def plot_treemap_sudeste_comparativo(fluxo):
+    """Gera um mapa de árvore comparando os fluxos: Sudeste -> [Sudeste, Sul, Nordeste, Norte, Centro-Oeste].
+
+    Se a biblioteca `squarify` não estiver disponível, gera um gráfico de barras horizontal como fallback.
+    Salva em `outputs/analise2_treemap_sudeste_comparativo.png`.
+    """
+    os.makedirs('outputs', exist_ok=True)
+
+    regioes_alvo = ['Sudeste', 'Sul', 'Nordeste', 'Norte', 'Centro-Oeste']
+    filtro = fluxo[fluxo['regiao_vendedor'] == 'Sudeste']
+    filtro = filtro[filtro['regiao_cliente'].isin(regioes_alvo)]
+
+    # Garantir ordem consistente e preencher zeros quando faltar alguma região
+    resumo = filtro.set_index('regiao_cliente').reindex(regioes_alvo).reset_index()
+    resumo['total_vendas'] = resumo['total_vendas'].fillna(0).astype(int)
+
+    sizes = resumo['total_vendas'].tolist()
+    total = sum(sizes)
+    if total == 0:
+        print("Nenhum dado disponível para o treemap Sudeste -> Regiões (total_vendas = 0).")
+        return
+
+    labels = []
+    for reg, cnt in zip(resumo['regiao_cliente'], resumo['total_vendas']):
+        pct = (cnt / total * 100) if total > 0 else 0
+        labels.append(f"Sudeste -> {reg}\n{cnt} vendas\n{pct:.1f}%")
+
+    try:
+        import squarify
+        colors = sns.color_palette('pastel', len(sizes)).as_hex()
+        plt.figure(figsize=(10, 6))
+        squarify.plot(sizes=sizes, label=labels, color=colors, alpha=0.8, text_kwargs={'fontsize':10})
+        plt.axis('off')
+        plt.title('Comparativo de Vendas: Sudeste -> Regiões', fontsize=14, fontweight='bold')
+        plt.tight_layout()
+        plt.savefig('outputs/analise2_treemap_sudeste_comparativo.png', dpi=150)
+        plt.close()
+        print("Salvo: outputs/analise2_treemap_sudeste_comparativo.png")
+    except Exception:
+        # Fallback simples com barras horizontais caso squarify não esteja disponível
+        fig, ax = plt.subplots(figsize=(8, 5))
+        bar_labels = [f"{r} ({c})" for r, c in zip(resumo['regiao_cliente'], resumo['total_vendas'])]
+        ax.barh(bar_labels, sizes, color=sns.color_palette('pastel', len(sizes)))
+        ax.set_title('Comparativo de Vendas: Sudeste -> Regiões')
+        ax.set_xlabel('Total de Vendas')
+        plt.tight_layout()
+        plt.savefig('outputs/analise2_treemap_sudeste_comparativo.png', dpi=150)
+        plt.close()
+        print("Salvo (fallback barras): outputs/analise2_treemap_sudeste_comparativo.png")
+
+
 # ==============================================================================
 # EXECUÇÃO PRINCIPAL
 # ==============================================================================
@@ -240,6 +289,11 @@ if __name__ == "__main__":
         comparacao               = analise_influencia_frete_proximidade(df)
 
         plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao)
+        # Gráfico adicional: treemap comparativo Sudeste -> outras regiões
+        try:
+            plot_treemap_sudeste_comparativo(fluxo)
+        except Exception as e:
+            print(f"Falha ao gerar treemap comparativo: {e}")
 
         # Exportar resultados em CSV para uso posterior no modelo de Deep Learning
         os.makedirs('outputs', exist_ok=True)
