@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import seaborn as sns
-import sys
 import os
 
 # Ajuste automático do diretório de trabalho para compatibilidade com o VSCode Interactive Window
