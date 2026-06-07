@@ -278,6 +278,88 @@ def plot_treemap_sudeste_comparativo(fluxo):
         print("Salvo (fallback barras): outputs/analise2_treemap_sudeste_comparativo.png")
 
 
+def plotar_distribuicoes(df):
+    """
+    Gera gráficos de distribuição (Boxplot e Histograma) para uma análise
+    mais aprofundada dos dados, evitando a repetição de gráficos de barra.
+    """
+    sns.set_theme(style="whitegrid", palette="muted", font_scale=1.1)
+    os.makedirs('outputs', exist_ok=True)
+    
+    cores_dict = {'Intra-Regional': '#4CAF50', 'Inter-Regional': '#FF7043'}
+
+    # ---- FIG 4: Boxplot de Frete por Região ----
+    plt.figure(figsize=(12, 6))
+    
+    # Filtrando os 2% mais altos para não distorcer o Boxplot visualmente com outliers super extremos
+    limite_frete = df['valor_frete'].quantile(0.98)
+    df_filtrado_frete = df[df['valor_frete'] <= limite_frete]
+
+    sns.boxplot(
+        data=df_filtrado_frete, 
+        x='regiao_cliente', 
+        y='valor_frete', 
+        hue='tipo_compra', 
+        palette=cores_dict,
+        showfliers=False # Ocultar outliers menores na visualização final para focar na distribuição principal
+    )
+    plt.title('Distribuição do Valor do Frete por Região (Boxplot)', fontsize=14, fontweight='bold')
+    plt.xlabel('Região do Comprador')
+    plt.ylabel('Valor do Frete (R$)')
+    plt.legend(title='Tipo de Compra')
+    plt.tight_layout()
+    plt.savefig('outputs/analise4_boxplot_frete_regiao.png', dpi=150)
+    plt.close()
+    print("Salvo: outputs/analise4_boxplot_frete_regiao.png")
+
+    # ---- FIG 5: Histograma da Proporção Frete/Preço ----
+    plt.figure(figsize=(10, 6))
+    
+    # Filtrar também outliers do ratio e zeros
+    limite_ratio = df['ratio_frete_preco'].quantile(0.98)
+    df_filtrado_ratio = df[(df['ratio_frete_preco'] <= limite_ratio) & (df['ratio_frete_preco'] > 0)]
+    
+    sns.histplot(data=df_filtrado_ratio, x='ratio_frete_preco', bins=40, kde=True, color='purple')
+    plt.title('Distribuição da Proporção Frete/Preço (Histograma)', fontsize=14, fontweight='bold')
+    plt.xlabel('Frete como % do Preço do Produto')
+    plt.ylabel('Frequência (Quantidade de Pedidos)')
+    plt.tight_layout()
+    plt.savefig('outputs/analise5_histograma_ratio_frete.png', dpi=150)
+    plt.close()
+    print("Salvo: outputs/analise5_histograma_ratio_frete.png")
+
+def plotar_matriz_correlacao(df):
+    """
+    Calcula e plota a matriz de correlação para variáveis numéricas.
+    """
+    sns.set_theme(style="white", font_scale=1.1)
+    os.makedirs('outputs', exist_ok=True)
+    
+    cols_numericas = ['preco', 'valor_frete', 'ratio_frete_preco']
+    df_corr = df[cols_numericas].dropna()
+    
+    # Matriz de correlação (Pearson)
+    matriz_corr = df_corr.corr()
+    
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(
+        matriz_corr, 
+        annot=True, 
+        fmt=".2f", 
+        cmap='coolwarm', 
+        vmin=-1, 
+        vmax=1, 
+        center=0,
+        square=True, 
+        linewidths=.5, 
+        cbar_kws={"shrink": .8}
+    )
+    plt.title('Matriz de Correlação (Preço vs Frete)', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig('outputs/analise6_matriz_correlacao.png', dpi=150)
+    plt.close()
+    print("Salvo: outputs/analise6_matriz_correlacao.png")
+
 # ==============================================================================
 # EXECUÇÃO PRINCIPAL
 # ==============================================================================
@@ -295,6 +377,12 @@ if __name__ == "__main__":
         plot_treemap_sudeste_comparativo(fluxo)
     except Exception as e:
         print(f"Falha ao gerar treemap comparativo: {e}")
+
+    # Plotar as distribuições (Boxplot e Histograma)
+    plotar_distribuicoes(df)
+
+    # Plotar a Matriz de Correlação
+    plotar_matriz_correlacao(df)
 
     # Exportar resultados em CSV para uso posterior no modelo de Deep Learning
     os.makedirs('outputs', exist_ok=True)
