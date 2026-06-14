@@ -1,0 +1,8 @@
+# Ignore Relatorios text and pdfs
+Relatorio_*.md
+Relatorio_*.pdf
+
+# Ignore HTMLs in outputs
+outputs/*.html
+
+# (Keep PNGs, CSVs, and PKLs in outputs as requested)
