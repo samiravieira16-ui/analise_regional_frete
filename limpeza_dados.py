@@ -1,178 +1,112 @@
 import pandas as pd
 import os
 
-def limpar_colunas_csvs(data_path='data/'):
+def executar_limpeza_passo_a_passo(data_path='data/'):
     """
-    Este script carrega os 4 arquivos CSV essenciais para o projeto
-    e remove todas as colunas desnecessárias, mantendo apenas as chaves
-    de ligação (IDs), estados (para cálculo de região), preço e frete.
+    Script de Limpeza de Dados (Refatorado)
+    Passo a passo documentado estritamente conforme o Relatório de Limpeza de Dados.
     """
     base_url = "https://raw.githubusercontent.com/samiravieira16-ui/analise_regional_frete/main/data/"
-    print(f"Iniciando limpeza dos dados obtidos de {base_url}...")
+    print("Iniciando a limpeza passo a passo dos dados...\n")
 
-    # 1. Itens do pedido
-    items_file = os.path.join(data_path, 'Conjunto_de_dados_de_itens_do_pedido.csv')
-    try:
-        print(f"Baixando e limpando colunas de: Conjunto_de_dados_de_itens_do_pedido.csv")
-        df_items = pd.read_csv(f"{base_url}Conjunto_de_dados_de_itens_do_pedido.csv")
-        # Tenta usar colunas em português, se não existir usa inglês
-        cols_items = ['pedido_id', 'vendedor_id', 'preco', 'valor_frete'] if 'pedido_id' in df_items.columns else ['order_id', 'seller_id', 'price', 'freight_value']
-        cols_items = [col for col in cols_items if col in df_items.columns]
-        if cols_items:
-            df_items = df_items[cols_items]
-            df_items.to_csv(items_file, index=False)
-            print(f"  ✓ Colunas mantidas e arquivo salvo localmente: {cols_items}")
-    except Exception as e:
-        print(f"Erro ao processar: {e}")
+    # ==========================================
+    # PASSO 1 e 2: ARQUIVOS ORIGINAIS E SELEÇÃO
+    # ==========================================
+    print("PASSO 1 e 2: Seleção de Arquivos (Deleção de 5 irrelevantes)")
+    print("Dos 9 arquivos originais, os seguintes 5 arquivos focados em avaliações, "
+          "pagamentos e categorias foram ignorados (deletados da análise):")
+    arquivos_ignorados = [
+        "olist_order_reviews_dataset.csv", 
+        "olist_order_payments_dataset.csv",
+        "olist_products_dataset.csv", 
+        "olist_sellers_dataset.csv (informações extras)", 
+        "product_category_name_translation.csv"
+    ]
+    for arq in arquivos_ignorados:
+        print(f"  - Descartado: {arq}")
+    
+    print("\nPASSO 3: Ficaram apenas os 4 arquivos primordiais (Clientes, Pedidos, Itens, Vendedores).")
 
-    # 2. Pedidos
-    orders_file = os.path.join(data_path, 'Conjunto_de_dados_de_pedidos.csv')
-    try:
-        print(f"Baixando e limpando colunas de: Conjunto_de_dados_de_pedidos.csv")
-        df_orders = pd.read_csv(f"{base_url}Conjunto_de_dados_de_pedidos.csv")
-        cols_orders = ['pedido_id', 'cliente_id'] if 'pedido_id' in df_orders.columns else ['order_id', 'customer_id']
-        cols_orders = [col for col in cols_orders if col in df_orders.columns]
-        if cols_orders:
-            df_orders = df_orders[cols_orders]
-            df_orders.to_csv(orders_file, index=False)
-            print(f"  ✓ Colunas mantidas e arquivo salvo localmente: {cols_orders}")
-    except Exception as e:
-        print(f"Erro ao processar: {e}")
-
-    # 3. Clientes
-    customers_file = os.path.join(data_path, 'Conjunto_de_dados_de_clientes.csv')
-    try:
-        print(f"Baixando e limpando colunas de: Conjunto_de_dados_de_clientes.csv")
-        df_customers = pd.read_csv(f"{base_url}Conjunto_de_dados_de_clientes.csv")
-        cols_customers = ['cliente_id', 'estado_cliente'] if 'cliente_id' in df_customers.columns else ['customer_id', 'customer_state']
-        cols_customers = [col for col in cols_customers if col in df_customers.columns]
-        if cols_customers:
-            df_customers = df_customers[cols_customers]
-            df_customers.to_csv(customers_file, index=False)
-            print(f"  ✓ Colunas mantidas e arquivo salvo localmente: {cols_customers}")
-    except Exception as e:
-        print(f"Erro ao processar: {e}")
-
-    # 4. Vendedores
-    sellers_file = os.path.join(data_path, 'Conjunto_de_dados_de_vendedores.csv')
-    try:
-        print(f"Baixando e limpando colunas de: Conjunto_de_dados_de_vendedores.csv")
-        df_sellers = pd.read_csv(f"{base_url}Conjunto_de_dados_de_vendedores.csv")
-        cols_sellers = ['vendedor_id', 'estado_vendedor'] if 'vendedor_id' in df_sellers.columns else ['seller_id', 'seller_state']
-        cols_sellers = [col for col in cols_sellers if col in df_sellers.columns]
-        if cols_sellers:
-            df_sellers = df_sellers[cols_sellers]
-            df_sellers.to_csv(sellers_file, index=False)
-            print(f"  ✓ Colunas mantidas e arquivo salvo localmente: {cols_sellers}")
-    except Exception as e:
-        print(f"Erro ao processar: {e}")
-
-    print("Limpeza concluída com sucesso!")
-
-
-def renomear_colunas_para_portugues(data_path='data/'):
-    """
-    Renomeia as colunas dos CSVs de inglês para português.
-    Esta etapa é parte da limpeza e preparação dos dados.
-    """
-    print("\nRenomeando colunas para português...")
-
-    # Mapeamento de tradução (inglês → português)
-    traducoes = {
-        'customer_id': 'cliente_id',
-        'customer_state': 'estado_cliente',
-        'order_id': 'pedido_id',
-        'seller_id': 'vendedor_id',
-        'price': 'preco',
-        'freight_value': 'valor_frete',
-        'seller_state': 'estado_vendedor'
+    arquivos_primordiais = {
+        'Conjunto_de_dados_de_clientes.csv': 'Clientes',
+        'Conjunto_de_dados_de_pedidos.csv': 'Pedidos',
+        'Conjunto_de_dados_de_itens_do_pedido.csv': 'Itens do Pedido',
+        'Conjunto_de_dados_de_vendedores.csv': 'Vendedores'
     }
 
-    # Lista de arquivos CSV
-    arquivos = [
-        'Conjunto_de_dados_de_pedidos.csv',
-        'Conjunto_de_dados_de_itens_do_pedido.csv',
-        'Conjunto_de_dados_de_clientes.csv',
-        'Conjunto_de_dados_de_vendedores.csv'
-    ]
+    # ==========================================
+    # PASSO 4 e 5: FILTRAGEM INTERNA E TRADUÇÃO
+    # ==========================================
+    print("\nPASSO 4 e 5: Filtragem Interna, Descarte de Colunas Inúteis e Tradução")
+    
+    # Dicionário mapeando os arquivos para as únicas colunas essenciais que manteremos (e suas traduções)
+    # Isso automaticamente descarta status, datas, descrições longas, limites, etc.
+    colunas_essenciais_e_traducoes = {
+        'Conjunto_de_dados_de_clientes.csv': {
+            'customer_id': 'cliente_id', 
+            'customer_state': 'estado_cliente'
+        },
+        'Conjunto_de_dados_de_pedidos.csv': {
+            'order_id': 'pedido_id', 
+            'customer_id': 'cliente_id'
+        },
+        'Conjunto_de_dados_de_itens_do_pedido.csv': {
+            'order_id': 'pedido_id', 
+            'seller_id': 'vendedor_id', 
+            'price': 'preco', 
+            'freight_value': 'valor_frete'
+        },
+        'Conjunto_de_dados_de_vendedores.csv': {
+            'seller_id': 'vendedor_id', 
+            'seller_state': 'estado_vendedor'
+        }
+    }
 
-    base_url = "https://raw.githubusercontent.com/samiravieira16-ui/analise_regional_frete/main/data/"
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
 
-    # Processar cada arquivo
-    for arquivo in arquivos:
-        caminho = os.path.join(data_path, arquivo)
+    for arquivo, nome_br in arquivos_primordiais.items():
+        print(f"\nProcessando arquivo: {nome_br} ({arquivo})")
+        arquivo_local = os.path.join(data_path, arquivo)
         
         try:
-            print(f"  Baixando e renomeando colunas: {arquivo}")
-            
-            # Ler CSV remoto
+            # Baixando arquivo remoto
             df = pd.read_csv(f"{base_url}{arquivo}")
             
-            # Renomear apenas as colunas que existem
-            renomeacoes = {col: traducoes[col] for col in df.columns if col in traducoes}
-            if renomeacoes:
-                df = df.rename(columns=renomeacoes)
-                df.to_csv(caminho, index=False)
-                print(f"    ✓ Colunas renomeadas e salvas localmente: {list(renomeacoes.values())}")
+            # Obtendo as colunas essenciais e a tradução correspondente
+            mapa_traducoes = colunas_essenciais_e_traducoes[arquivo]
+            colunas_essenciais = list(mapa_traducoes.keys())
+            colunas_traduzidas = list(mapa_traducoes.values())
+            
+            # Algumas bases podem já estar com a coluna em português
+            colunas_presentes_en = [col for col in colunas_essenciais if col in df.columns]
+            colunas_presentes_pt = [col for col in colunas_traduzidas if col in df.columns]
+
+            if colunas_presentes_en:
+                # PASSO 4: Descartar colunas inúteis
+                df = df[colunas_presentes_en]
+                # PASSO 5 e 1: Traduzir para português
+                df = df.rename(columns=mapa_traducoes)
+                print(f"  ✓ Colunas inúteis descartadas.")
+                print(f"  ✓ Colunas essenciais mantidas e traduzidas: {list(df.columns)}")
+                df.to_csv(arquivo_local, index=False)
+            
+            elif colunas_presentes_pt:
+                # Já estava traduzido
+                df = df[colunas_presentes_pt]
+                print(f"  ✓ Colunas inúteis descartadas.")
+                print(f"  ✓ Colunas essenciais mantidas (já em PT): {list(df.columns)}")
+                df.to_csv(arquivo_local, index=False)
+                
             else:
-                print(f"    ℹ Nenhuma coluna para traduzir neste arquivo")
-        except Exception as e:
-            print(f"  ⚠ Erro ao baixar ou processar {arquivo}: {e}")
-
-    print("Renomeação concluída com sucesso!")
-
-
-
-def renomear_colunas_para_portugues(data_path='data/'):
-    """
-    Renomeia as colunas dos CSVs de inglês para português.
-    Esta etapa é parte da limpeza e preparação dos dados.
-    """
-    print("\nRenomeando colunas para português...")
-
-    # Mapeamento de tradução (inglês → português)
-    traducoes = {
-        'customer_id': 'cliente_id',
-        'customer_state': 'estado_cliente',
-        'order_id': 'pedido_id',
-        'seller_id': 'vendedor_id',
-        'price': 'preco',
-        'freight_value': 'valor_frete',
-        'seller_state': 'estado_vendedor'
-    }
-
-    # Lista de arquivos CSV
-    arquivos = [
-        'Conjunto_de_dados_de_pedidos.csv',
-        'Conjunto_de_dados_de_itens_do_pedido.csv',
-        'Conjunto_de_dados_de_clientes.csv',
-        'Conjunto_de_dados_de_vendedores.csv'
-    ]
-
-    # Processar cada arquivo
-    for arquivo in arquivos:
-        caminho = os.path.join(data_path, arquivo)
+                print(f"  ⚠ Não foi possível encontrar colunas vitais no arquivo.")
         
-        if os.path.exists(caminho):
-            print(f"  Renomeando colunas: {arquivo}")
-            
-            # Ler CSV
-            df = pd.read_csv(caminho)
-            
-            # Renomear apenas as colunas que existem
-            renomeacoes = {col: traducoes[col] for col in df.columns if col in traducoes}
-            if renomeacoes:
-                df = df.rename(columns=renomeacoes)
-                df.to_csv(caminho, index=False)
-                print(f"    ✓ Colunas renomeadas: {list(renomeacoes.values())}")
-            else:
-                print(f"    ℹ Nenhuma coluna para traduzir neste arquivo")
-        else:
-            print(f"  ⚠ Arquivo não encontrado: {arquivo}")
+        except Exception as e:
+            print(f"  ⚠ Erro ao processar {arquivo}: {e}")
 
-    print("Renomeação concluída com sucesso!")
-
+    print("\n===========================================")
+    print("Processo de Limpeza de Dados Finalizado!")
+    print("===========================================")
 
 if __name__ == "__main__":
-    limpar_colunas_csvs()
-    renomear_colunas_para_portugues()
+    executar_limpeza_passo_a_passo()

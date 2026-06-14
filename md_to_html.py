@@ -41,3 +41,4 @@ def convert_md_to_html(md_file, html_file):
 if __name__ == "__main__":
     convert_md_to_html("Relatorio_Analise_Frete.md", "outputs/Relatorio_Analise_Frete_Imprimir.html")
     convert_md_to_html("Relatorio_Dados_Numericos.md", "outputs/Relatorio_Dados_Numericos_Imprimir.html")
+    convert_md_to_html("Relatorio_Limpeza_de_Dados.md", "outputs/Relatorio_Limpeza_de_Dados_Imprimir.html")
