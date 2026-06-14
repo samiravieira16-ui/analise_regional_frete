@@ -23,7 +23,7 @@ def treinar_modelo_neural():
     # hidden_layer_sizes=(16, 8) -> 1 camada oculta com 16 neurônios, 1 camada com 8 neurônios
     # activation='relu' -> Função de ativação padrão para hidden layers
     # solver='adam' -> Otimizador padrão e rápido
-    # max_iter=200 -> Número máximo de épocas
+    # max_iter=300 -> Número máximo de épocas
     mlp = MLPClassifier(
         hidden_layer_sizes=(16, 8), 
         activation='relu', 
