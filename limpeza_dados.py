@@ -4,7 +4,8 @@ import os
 def executar_limpeza_passo_a_passo(data_path='data/'):
     """
     Script de Limpeza de Dados (Refatorado)
-    Passo a passo documentado estritamente conforme o Relatório de Limpeza de Dados.
+    Realiza o passo a passo da extração, descarte de arquivos irrelevantes,
+    e tradução/filtragem de colunas para o modelo de Inteligência Artificial.
     """
     base_url = "https://raw.githubusercontent.com/samiravieira16-ui/analise_regional_frete/main/data/"
     print("Iniciando a limpeza passo a passo dos dados...\n")
