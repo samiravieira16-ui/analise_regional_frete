@@ -6,13 +6,6 @@ import matplotlib.ticker as mticker
 import seaborn as sns
 import os
 
-# Ajuste automático do diretório de trabalho para compatibilidade com o VSCode Interactive Window
-_this_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in locals() else os.path.join(os.getcwd(), 'analise_regional_frete')
-if _this_dir not in sys.path and os.path.exists(_this_dir):
-    sys.path.append(_this_dir)
-elif os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
-
 from src.utils import get_region
 
 # ==============================================================================
@@ -23,27 +16,27 @@ def carregar_e_processar_dados():
     base_url = "https://raw.githubusercontent.com/samiravieira16-ui/analise_regional_frete/main/data/"
     print(f"Carregando datasets do repositório remoto: {base_url}...")
     
-    files = {
-        'orders': 'Conjunto_de_dados_de_pedidos.csv',
-        'items': 'Conjunto_de_dados_de_itens_do_pedido.csv',
-        'customers': 'Conjunto_de_dados_de_clientes.csv',
-        'sellers': 'Conjunto_de_dados_de_vendedores.csv'
+    arquivos = {
+        'pedidos': 'Conjunto_de_dados_de_pedidos.csv',
+        'itens': 'Conjunto_de_dados_de_itens_do_pedido.csv',
+        'clientes': 'Conjunto_de_dados_de_clientes.csv',
+        'vendedores': 'Conjunto_de_dados_de_vendedores.csv'
     }
     
     # Fazendo o download diretamente da URL remota (raw)
-    df_orders   = pd.read_csv(f"{base_url}{files['orders']}")
-    df_items    = pd.read_csv(f"{base_url}{files['items']}")
-    df_customers= pd.read_csv(f"{base_url}{files['customers']}")
-    df_sellers  = pd.read_csv(f"{base_url}{files['sellers']}")
+    df_pedidos    = pd.read_csv(f"{base_url}{arquivos['pedidos']}")
+    df_itens      = pd.read_csv(f"{base_url}{arquivos['itens']}")
+    df_clientes   = pd.read_csv(f"{base_url}{arquivos['clientes']}")
+    df_vendedores = pd.read_csv(f"{base_url}{arquivos['vendedores']}")
     
     print("Mesclando dados...")
-    df = pd.merge(df_items,    df_orders,    on='pedido_id')
-    df = pd.merge(df,          df_customers, on='cliente_id')
-    df = pd.merge(df,          df_sellers,   on='vendedor_id', suffixes=('_cust', '_sell'))
+    df = pd.merge(df_itens, df_pedidos, on='pedido_id')
+    df = pd.merge(df, df_clientes, on='cliente_id')
+    df = pd.merge(df, df_vendedores, on='vendedor_id', suffixes=('_cust', '_sell'))
     
     print("Mapeando regiões...")
     df['regiao_cliente'] = df['estado_cliente'].apply(get_region)
-    df['regiao_vendedor']   = df['estado_vendedor'].apply(get_region)
+    df['regiao_vendedor'] = df['estado_vendedor'].apply(get_region)
     
     # Classificar como INTRA-regional (mesma região) ou INTER-regional (regiões diferentes)
     df['tipo_compra'] = np.where(
@@ -144,6 +137,7 @@ def analise_influencia_frete_proximidade(df):
 # ==============================================================================
 
 def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
+    """Gera todas as visualizações principais: gráficos de pizza, heatmaps e comparativos de frete."""
     
     sns.set_theme(style="whitegrid", palette="muted", font_scale=1.1)
     os.makedirs('outputs', exist_ok=True)
@@ -228,11 +222,8 @@ def plotar_todas_visualizacoes(resumo_geral, por_regiao, fluxo, comparacao):
 
 
 def plot_treemap_sudeste_comparativo(fluxo):
-    """Gera um mapa de árvore comparando os fluxos: Sudeste -> [Sudeste, Sul, Nordeste, Norte, Centro-Oeste].
-
-    Se a biblioteca `squarify` não estiver disponível, gera um gráfico de barras horizontal como fallback.
-    Salva em `outputs/analise2_treemap_sudeste_comparativo.png`.
-    """
+    """Gera um mapa de árvore comparando os fluxos: Sudeste -> [Sudeste, Sul, Nordeste, Norte, Centro-Oeste]."""
+    
     os.makedirs('outputs', exist_ok=True)
 
     regioes_alvo = ['Sudeste', 'Sul', 'Nordeste', 'Norte', 'Centro-Oeste']
@@ -329,9 +320,7 @@ def plotar_distribuicoes(df):
     print("Salvo: outputs/analise5_histograma_ratio_frete.png")
 
 def plotar_matriz_correlacao(df):
-    """
-    Calcula e plota a matriz de correlação para variáveis numéricas.
-    """
+    """Calcula e plota a matriz de correlação para variáveis numéricas."""
     sns.set_theme(style="white", font_scale=1.1)
     os.makedirs('outputs', exist_ok=True)
     

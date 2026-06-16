@@ -3,22 +3,8 @@ import os
 
 def executar_limpeza_passo_a_passo(data_path='data/'):
     """
-    Script de Limpeza e Preparação dos Dados.
-
-    Etapas executadas:
-    1. Dos 9 arquivos CSV originais, apenas os 4 primordiais são carregados:
-       Clientes, Pedidos, Itens do Pedido e Vendedores.
-    2. As colunas inúteis (datas, status, descrições longas, limites de envio)
-       são descartadas automaticamente ao selecionar apenas as essenciais.
-    3. As colunas essenciais mantidas são:
-       - 'order_id'       -> chave principal do pedido
-       - 'customer_id'    -> chave estrangeira do cliente
-       - 'seller_id'      -> chave estrangeira do vendedor
-       - 'customer_state' -> estado de destino (região do comprador)
-       - 'seller_state'   -> estado de origem (região do vendedor)
-       - 'price'          -> preço do produto
-       - 'freight_value'  -> valor do frete
-    4. Os nomes das colunas são traduzidos do inglês para o Português.
+    Script de Limpeza de Dados (Refatorado)
+    Passo a passo documentado estritamente conforme o Relatório de Limpeza de Dados.
     """
     base_url = "https://raw.githubusercontent.com/samiravieira16-ui/analise_regional_frete/main/data/"
     print("Iniciando a limpeza passo a passo dos dados...\n")
