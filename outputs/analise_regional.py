@@ -321,7 +321,6 @@ def plotar_distribuicoes(df):
 
 def plotar_matriz_correlacao(df):
     """Calcula e plota a matriz de correlação para variáveis numéricas."""
-    
     sns.set_theme(style="white", font_scale=1.1)
     os.makedirs('outputs', exist_ok=True)
     
